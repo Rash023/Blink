@@ -1,5 +1,7 @@
 const express = require("express");
 const { searchUser, updateUserInfo } = require("../controllers/user");
+const { authMiddleWare } = require("../middlewares/user");
+
 const router = express.Router();
 
 router.post("/SignUp", SignUp);
