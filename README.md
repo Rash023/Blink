@@ -1,2 +1,1 @@
-
-## Build a basic version of PayTM
+## Blink - Make transactions with a blink
