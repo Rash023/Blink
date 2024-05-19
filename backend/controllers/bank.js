@@ -6,15 +6,20 @@ const mongoose = require("mongoose");
 require("dotenv").config();
 
 //handler to get balance of the user
-export const getBalance = async (req, res) => {
+exports.getBalance = async (req, res) => {
   try {
-    const token = req.header.replace("Bearer", "");
+    const token =
+      req.body.token || req.header("Authorization").replace("Bearer ", "");
+
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     const id = decodedToken.userId;
 
-    const account = Bank.findById(id);
+    const account = await Bank.findOne({ userId: id });
 
-    return account.balance;
+    return res.status(200).json({
+      succes: true,
+      balance: account.balance,
+    });
   } catch {
     return res.status(404).json({
       success: false,
@@ -25,68 +30,45 @@ export const getBalance = async (req, res) => {
 
 //handler to transfer funds
 
-export const transferFunds = async (req, res) => {
-  try {
-    const session = await mongoose.startSession();
+exports.transferFunds = async (req, res) => {
+  const session = await mongoose.startSession();
 
-    session.startTransaction();
-    const { amount, to } = req.body;
+  session.startTransaction();
+  const { amount, to } = req.body;
+  const token = req.body.token;
+  let decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+  let id = decodedToken.userId;
+  // Fetch the accounts within the transaction
+  const account = await Bank.findOne({ userId: id }).session(session);
 
-    const token = req.header().replace("Beared", "");
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    const id = decodedToken.userId;
-
-    const account = await Bank.findOne({ userId: id }).session(session);
-
-    if (!account || account.balance < amount) {
-      await session.abortTransaction();
-      return res.status(403).json({
-        success: false,
-        message: "Insufficient Balance",
-      });
-    }
-
-    const reciever = await Bank.findOne({ userId: to }).session(session);
-
-    if (!reciever) {
-      await session.abortTransaction();
-      return res.status(403).json({
-        success: false,
-        message: "Reciever not found",
-      });
-    }
-
-    await account
-      .updateOne(
-        { userId: id },
-        {
-          $inc: {
-            balance: -amount,
-          },
-        }
-      )
-      .session(session);
-    await reciever
-      .updateOne(
-        { userId: to },
-        {
-          $inc: {
-            balance: amount,
-          },
-        }
-      )
-      .session(session);
-
-    await session.commitTransaction();
-
-    return res.status.json({
-      success: true,
-      message: "Funds transfered succesfully",
-    });
-  } catch {
-    return res.status(404).json({
-      success: false,
-      message: "Internal Server Error",
+  if (!account || account.balance < amount) {
+    await session.abortTransaction();
+    return res.status(400).json({
+      message: "Insufficient balance",
     });
   }
+
+  const toAccount = await Bank.findOne({ userId: to }).session(session);
+
+  if (!toAccount) {
+    await session.abortTransaction();
+    return res.status(400).json({
+      message: "Invalid account",
+    });
+  }
+
+  // Perform the transfer
+  await Bank.updateOne(
+    { userId: req.userId },
+    { $inc: { balance: -amount } }
+  ).session(session);
+  await Bank.updateOne({ userId: to }, { $inc: { balance: amount } }).session(
+    session
+  );
+
+  // Commit the transaction
+  await session.commitTransaction();
+  res.json({
+    message: "Transfer successful",
+  });
 };
