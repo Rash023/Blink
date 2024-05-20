@@ -202,3 +202,39 @@ exports.searchUser = async (req, res) => {
     });
   }
 };
+
+//handler to search a user
+exports.filterUser = async (req, res) => {
+  try {
+    const filter = req.query.filter || "";
+
+    const users = await User.find({
+      $or: [
+        {
+          firstName: {
+            $regex: filter,
+          },
+        },
+        {
+          lastName: {
+            $regex: filter,
+          },
+        },
+      ],
+    });
+
+    return res.status(200).json({
+      user: users.map((user) => ({
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        _id: user._id,
+      })),
+    });
+  } catch {
+    return res.status(404).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};

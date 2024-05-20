@@ -9,8 +9,8 @@ import { useNavigate } from "react-router-dom";
 
 export const Signup = () => {
   const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [username, setUsername] = useState("");
+  const [secondName, setSecondName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
@@ -21,6 +21,7 @@ export const Signup = () => {
           <Heading label={"Sign up"} />
           <SubHeading label={"Enter your infromation to create an account"} />
           <InputBox
+            type="text"
             onChange={(e) => {
               setFirstName(e.target.value);
             }}
@@ -28,20 +29,23 @@ export const Signup = () => {
             label={"First Name"}
           />
           <InputBox
+            type="text"
             onChange={(e) => {
-              setLastName(e.target.value);
+              setSecondName(e.target.value);
             }}
             placeholder="Doe"
             label={"Last Name"}
           />
           <InputBox
+            type="text"
             onChange={(e) => {
-              setUsername(e.target.value);
+              setEmail(e.target.value);
             }}
             placeholder="johndoe123@gmail.com"
             label={"Email"}
           />
           <InputBox
+            type="password"
             onChange={(e) => {
               setPassword(e.target.value);
             }}
@@ -51,15 +55,17 @@ export const Signup = () => {
           <div className="pt-4">
             <Button
               onClick={async () => {
+                console.log("here");
                 const response = await axios.post(
                   "http://localhost:3000/api/v1/user/signup",
                   {
-                    username,
+                    email,
                     firstName,
-                    lastName,
+                    secondName,
                     password,
                   }
                 );
+
                 localStorage.setItem("token", response.data.token);
                 navigate("/dashboard");
               }}
