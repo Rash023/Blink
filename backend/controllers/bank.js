@@ -8,8 +8,8 @@ require("dotenv").config();
 //handler to get balance of the user
 exports.getBalance = async (req, res) => {
   try {
-    const token =
-      req.body.token || req.header("Authorization").replace("Bearer ", "");
+    const authHeader = req.headers["authorization"];
+    const token = authHeader.replace("Bearer ", "").trim();
 
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     const id = decodedToken.userId;
@@ -36,7 +36,8 @@ exports.transferFunds = async (req, res) => {
 
     session.startTransaction();
     const { amount, to } = req.body;
-    const token = req.body.token;
+    const token = req.header("Authorization").replace("Bearer ", "");
+
     let decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     let id = decodedToken.userId;
     // Fetch the accounts within the transaction
@@ -60,16 +61,18 @@ exports.transferFunds = async (req, res) => {
 
     // Perform the transfer
     await Bank.updateOne(
-      { userId: req.userId },
+      { userId: id },
       { $inc: { balance: -amount } }
     ).session(session);
-    await Bank.updateOne({ userId: to }, { $inc: { balance: amount } }).session(
-      session
-    );
+    await Bank.updateOne(
+      { userId: to },
+      { $inc: { balance: +amount } }
+    ).session(session);
 
     // Commit the transaction
     await session.commitTransaction();
-    res.json({
+    res.status(200).json({
+      success: true,
       message: "Transfer successful",
     });
   } catch {

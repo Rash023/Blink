@@ -1,6 +1,5 @@
 const express = require("express");
 const {
-  searchUser,
   updateUserInfo,
   SignUp,
   login,
@@ -12,7 +11,7 @@ const router = express.Router();
 
 router.post("/signup", SignUp);
 router.post("/login", login);
-router.get("/search", authMiddleWare, searchUser);
+
 router.post("/updateInfo", authMiddleWare, updateUserInfo);
 router.get("/bulk", filterUser);
 

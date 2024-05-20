@@ -165,47 +165,53 @@ exports.updateUserInfo = async (req, res) => {
 
 const filterSchema = z.string();
 
-//handler to search user based on the username
-exports.searchUser = async (req, res) => {
-  try {
-    const filter = req.query.filter || "";
+// //handler to search user based on the username
+// exports.searchUser = async (req, res) => {
+//   try {
+//     const filter = req.query.filter || "";
 
-    const { success } = filterSchema.safeParse(filter);
+//     const { success } = filterSchema.safeParse(filter);
 
-    if (!success) {
-      return res.status(403).json({
-        success: false,
-        messsaeg: "Invalid input",
-      });
-    }
+//     if (!success) {
+//       return res.status(403).json({
+//         success: false,
+//         messsaeg: "Invalid input",
+//       });
+//     }
 
-    const response = await User.find({
-      $or: [
-        {
-          firstName: {
-            $regex: filter,
-          },
-        },
-        {
-          secondName: {
-            $regex: filter,
-          },
-        },
-      ],
-    });
+//     const response = await User.find({
+//       $or: [
+//         {
+//           firstName: {
+//             $regex: filter,
+//           },
+//         },
+//         {
+//           secondName: {
+//             $regex: filter,
+//           },
+//         },
+//       ],
+//     });
 
-    return response;
-  } catch {
-    return res.status(404).json({
-      success: false,
-      message: "Internal Server Error",
-    });
-  }
-};
+//     return response;
+//   } catch {
+//     return res.status(404).json({
+//       success: false,
+//       message: "Internal Server Error",
+//     });
+//   }
+// };
 
 //handler to search a user
 exports.filterUser = async (req, res) => {
   try {
+    const token = req.header("Authorization").replace("Bearer ", "").trim();
+
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+
+    const id = decodedToken.userId;
+
     const filter = req.query.filter || "";
 
     const users = await User.find({
@@ -223,13 +229,52 @@ exports.filterUser = async (req, res) => {
       ],
     });
 
+    const filteredData = users.filter((e) => {
+      return e._id != id;
+    });
+
     return res.status(200).json({
-      user: users.map((user) => ({
+      user: filteredData.map((user) => ({
         username: user.username,
         firstName: user.firstName,
         lastName: user.lastName,
         _id: user._id,
       })),
+    });
+  } catch {
+    return res.status(404).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+exports.checkLogin = async (req, res) => {
+  try {
+    const token = req.header["Authorization"].replace("Bearer ", "").trim();
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "User not logged in",
+      });
+    }
+    //handler to check if user is logged in or not
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    const id = decodedToken.userId;
+
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(403).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "User logged in",
     });
   } catch {
     return res.status(404).json({

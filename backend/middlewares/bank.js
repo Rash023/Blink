@@ -5,7 +5,8 @@ require("dotenv").config();
 exports.bankMiddleWare = async (req, res, next) => {
   try {
     const token =
-      req.body.token || req.header.authorization.replace("Bearer ", "").trim();
+      req.body.token ||
+      req.header("Authorization").replace("Bearer ", "").trim();
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
 
     const id = decodedToken.userId;

@@ -3,7 +3,7 @@ require("dotenv").config();
 
 exports.authMiddleWare = async (req, res, next) => {
   try {
-    const authHeader = req.header.authorization;
+    const authHeader = req.header["Authorization"];
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(403).json({
