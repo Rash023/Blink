@@ -3,11 +3,9 @@ import { Button } from "./Button";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-export const Users = () => {
-  // Replace with backend call
+//custom hook to get users
+function useGetUsers(filter) {
   const [users, setUsers] = useState([]);
-  const [filter, setFilter] = useState("");
-
   useEffect(() => {
     axios
       .get("http://localhost:3000/api/v1/user/bulk?filter=" + filter, {
@@ -19,6 +17,12 @@ export const Users = () => {
         setUsers(response.data.user);
       });
   }, [filter]);
+
+  return users;
+}
+export const Users = () => {
+  const [filter, setFilter] = useState("");
+  const users = useGetUsers(filter);
 
   return (
     <>

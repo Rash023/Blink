@@ -113,7 +113,7 @@ exports.login = async (req, res) => {
         message: "Incorrect password",
       });
     }
-  } catch {
+  } catch (err) {
     return res.status(404).json({
       success: false,
       message: "Internal Server Error",
@@ -155,53 +155,13 @@ exports.updateUserInfo = async (req, res) => {
       success: true,
       message: "User info updated succesfully",
     });
-  } catch {
+  } catch (err) {
     return res.status(404).json({
       success: false,
       message: "Internal Server Error",
     });
   }
 };
-
-const filterSchema = z.string();
-
-// //handler to search user based on the username
-// exports.searchUser = async (req, res) => {
-//   try {
-//     const filter = req.query.filter || "";
-
-//     const { success } = filterSchema.safeParse(filter);
-
-//     if (!success) {
-//       return res.status(403).json({
-//         success: false,
-//         messsaeg: "Invalid input",
-//       });
-//     }
-
-//     const response = await User.find({
-//       $or: [
-//         {
-//           firstName: {
-//             $regex: filter,
-//           },
-//         },
-//         {
-//           secondName: {
-//             $regex: filter,
-//           },
-//         },
-//       ],
-//     });
-
-//     return response;
-//   } catch {
-//     return res.status(404).json({
-//       success: false,
-//       message: "Internal Server Error",
-//     });
-//   }
-// };
 
 //handler to search a user
 exports.filterUser = async (req, res) => {
