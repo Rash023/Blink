@@ -8,8 +8,7 @@ require("dotenv").config();
 //handler to get balance of the user
 exports.getBalance = async (req, res) => {
   try {
-    const authHeader = req.headers["authorization"];
-    const token = authHeader.replace("Bearer ", "").trim();
+    const token = req.header("Authorization").replace("Bearer ", "").trim();
 
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     const id = decodedToken.userId;
@@ -20,8 +19,9 @@ exports.getBalance = async (req, res) => {
       succes: true,
       balance: account.balance,
     });
-  } catch {
+  } catch (error) {
     return res.status(404).json({
+      err: error,
       success: false,
       message: "Internal Server Error",
     });
@@ -82,3 +82,5 @@ exports.transferFunds = async (req, res) => {
     });
   }
 };
+
+//handler to get balance of the user
