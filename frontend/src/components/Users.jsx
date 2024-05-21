@@ -4,11 +4,11 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 //custom hook to get users
-function useGetUsers(filter) {
+function useGetUsers(debouncedFilter) {
   const [users, setUsers] = useState([]);
   useEffect(() => {
     axios
-      .get("http://localhost:3000/api/v1/user/bulk?filter=" + filter, {
+      .get("http://localhost:3000/api/v1/user/bulk?filter=" + debouncedFilter, {
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token"),
         },
@@ -16,13 +16,29 @@ function useGetUsers(filter) {
       .then((response) => {
         setUsers(response.data.user);
       });
-  }, [filter]);
+  }, [debouncedFilter]);
 
   return users;
 }
+
+function useDebounce(filter, timeout) {
+  const [debouncedValue, setDebounceValue] = useState(filter);
+  useEffect(() => {
+    let timeoutNumber = setTimeout(() => {
+      setDebounceValue(filter);
+    }, timeout);
+
+    return () => {
+      clearTimeout(timeoutNumber);
+    };
+  }, [filter]);
+  return debouncedValue;
+}
 export const Users = () => {
   const [filter, setFilter] = useState("");
-  const users = useGetUsers(filter);
+  const debouncedFilter = useDebounce(filter, 300);
+
+  const users = useGetUsers(debouncedFilter);
 
   return (
     <>
