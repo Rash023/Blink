@@ -1,22 +1,12 @@
 # Blink - Make transactions with a blink
 
-Blink is a payments app with secure Transaction control mechanisms implemented.
+Blink is a payments app featuring robust transaction control mechanisms to ensure security. It leverages MongoDB Transactions to execute transactions reliably, preventing any faulty or incomplete transactions. This implementation ensures that all operations within a transaction are completed successfully, maintaining data integrity and consistency. As a result, users can trust that their financial transactions are both secure and accurate.
 
-Used MongoDB Transactions to securely carry out the transactions ensuring no faulty transactions occur.
 
-<<<<<<< HEAD
 Tech used:- ReactJs, NodeJs, MongoDB, Javascript
 
 ## Installation
 
-=======
-
-Tech used:- ReactJs, NodeJs, MongoDB, Javascript
-## Installation
-
-
-
->>>>>>> 103c6a46f95cd53bf63b4a85728b2da678cf98b0
 ```bash
 git clone https://github.com/Rash023/Blink.git
 
@@ -28,11 +18,3 @@ cd backend
 npm i
 npm run dev
 ```
-
-<<<<<<< HEAD
-=======
-
->>>>>>> 103c6a46f95cd53bf63b4a85728b2da678cf98b0
-## License
-
-[MIT](https://choosealicense.com/licenses/mit/)
